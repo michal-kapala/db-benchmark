@@ -25,3 +25,20 @@ model Post {
   author    User?    @relation(fields: [authorId], references: [id])
   authorId  Int?
 }
+
+// Db operation performance result times
+model Result {
+  id              Int      @id @default(autoincrement())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  type            ResultType
+  supabaseTime    Float
+  railwayTime     Float
+  renderTime      Float
+  
+}
+
+enum ResultType {
+  Query
+  Insert
+}
