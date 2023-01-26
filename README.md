@@ -17,3 +17,29 @@ The benchmark is a TS SvelteKit app bootstrapped with [`try-prisma`](https://www
 - [Prisma.io](https://www.prisma.io/)
 - [Chart.js](https://www.chartjs.org/)
 - [TailwindCSS](https://tailwindcss.com/)
+
+# Development
+
+## Deployment
+
+To deploy this benchmark to test your database connections, use the Deploy button to deploy to [Vercel](https://vercel.com).
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmichal-kapala%2Fdb-benchmark&env=SUPABASE_DB_URL,RAILWAY_DB_URL,RENDER_DB_URL&envDescription=Standard%20PostgreSQL%20connection%20strings%20for%20Supabase%2C%20Railway.app%20and%20Render.com%20instances.)
+
+## Local development
+
+To configure the project for local development:
+1. Install the dependencies
+```
+npm install
+```
+2. Synchronize Prisma schema with your database projects (for each tested database project)
+- set the environment variable for `provider` in [schema.prisma](https://github.com/michal-kapala/db-benchmark/blob/master/prisma/schema.prisma#L6)'s datasource
+- synchronize the database structure with the hosted instance
+```
+npx prisma db push
+```
+3. Run the application:
+```
+npm run dev
+```
