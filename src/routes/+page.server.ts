@@ -1,8 +1,8 @@
-import type { Post } from "@prisma/client";
 import type { PageServerLoad } from "./$types";
+import { supabase } from "$lib/prisma";
 
 export const load: PageServerLoad = async ({ fetch }) => {
-  const response = await fetch('/api/feed');
+  const results = await supabase.result.findMany();
 
-  return { feed: (await response.json()) as Post[] };
+  return { results };
 };
