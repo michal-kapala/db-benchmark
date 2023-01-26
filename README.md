@@ -37,6 +37,10 @@ npm install
 ```
 2. Synchronize Prisma schema with your database projects (for each tested database project)
 - set the environment variable for `provider` in [schema.prisma](https://github.com/michal-kapala/db-benchmark/blob/master/prisma/schema.prisma#L6)'s datasource
+```
+# Connection string format
+postgresql://postgres:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
+```
 - synchronize the database structure with the hosted instance
 ```
 npx prisma db push
