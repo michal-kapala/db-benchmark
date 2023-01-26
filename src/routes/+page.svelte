@@ -41,6 +41,8 @@
   let currInsertResult: Result;
   let allInsertResults = data.results.filter(r => r.type === 'Insert');
 
+  let sampleCount = data.results.length;
+
   let currQueryChartData: ChartData;
   let allQueryChartData: ChartData;
   let currInsertChartData: ChartData;
@@ -55,6 +57,8 @@
     currQueryResult = await response.json() as unknown as Result;
     response = await fetch('/api/common/test/insert');
     currInsertResult = await response.json() as unknown as Result;
+    sampleCount += 2;
+    
     // current query chart
     currQueryChartData = {
       labels: ['Supabase', 'Railway.app', 'Render'],
@@ -270,6 +274,7 @@
           <Bar data={allInsertChartData} options={{ responsive: true }} />
         </div>
       </div>
+      <h2 class="flex justify-center items-center">Samples: {sampleCount}</h2>
     </div>
     {/if}
   </main>
