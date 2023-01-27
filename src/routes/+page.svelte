@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { Bar } from 'svelte-chartjs';
+  import { Bar, Line } from 'svelte-chartjs';
   import {
     Chart,
     Title,
@@ -9,51 +9,49 @@
     BarElement,
     CategoryScale,
     LinearScale,
+    LineElement,
+    PointElement,
   } from 'chart.js';
+    import { makeLineChartData } from '$lib/utils';
+    import type { BarChartData } from '$lib/utils';
+    import type { Result } from '@prisma/client';
 
   // data returned from +page.server.js
   export let data: PageData;
 
-  // Result type
-  type Result = {
-    type: string,
-    supabaseTime: number,
-    railwayTime: number,
-    renderTime: number,
-  };
-
-  // Chart data type
-  type ChartData = {
-    labels: string[],
-    datasets: {
-      label: string,
-      data: number[],
-      backgroundColor: string[],
-      borderWidth: number,
-      borderColor: string[]
-    }[],
-    
-  };
-
   // Chart data
   let currQueryResult: Result;
-  let allQueryResults = data.results.filter(r => r.type === 'Query');
+  let allQueryResults = data.results.filter(r => r.type === 'Query') as Result[];
   let currInsertResult: Result;
-  let allInsertResults = data.results.filter(r => r.type === 'Insert');
+  let allInsertResults = data.results.filter(r => r.type === 'Insert') as Result[];
 
   let sampleCount = data.results.length;
 
-  let currQueryChartData: ChartData;
-  let allQueryChartData: ChartData;
-  let currInsertChartData: ChartData;
-  let allInsertChartData: ChartData;
+  let currQueryChartData: BarChartData;
+  let allQueryChartData: BarChartData;
+  let currInsertChartData: BarChartData;
+  let allInsertChartData: BarChartData;
+  
+  let queryHourAvgSupabase: number[] = [];
+  let queryHourAvgRailway: number[] = [];
+  let queryHourAvgRender: number[] = [];
+  let insertHourAvgSupabase: number[] = [];
+  let insertHourAvgRailway: number[] = [];
+  let insertHourAvgRender: number[] = [];
 
   // chart UI state
   let showCharts = false;
 
   // test-making function
   async function test() {
-    let response = await fetch('/api/common/test/query');
+    // refresh sample pool
+    let response = await fetch('/api/results');
+    let newResults = await response.json() as Result[];
+    sampleCount = newResults.length;
+    allQueryResults = newResults.filter(r => r.type === 'Query');
+    allInsertResults = newResults.filter(r => r.type === 'Insert');
+    // perform tests
+    response = await fetch('/api/common/test/query');
     currQueryResult = await response.json() as unknown as Result;
     response = await fetch('/api/common/test/insert');
     currInsertResult = await response.json() as unknown as Result;
@@ -206,11 +204,11 @@
           ],
           backgroundColor: [
             // green
-            'rgba(113, 205, 205,0.4)',
+            'rgba(113, 205, 205, 0.4)',
             // purple
-            'rgba(170, 128, 252,0.4)',
+            'rgba(170, 128, 252, 0.4)',
             // blue
-            'rgba(98,  182, 239,0.4)',
+            'rgba(98, 182, 239, 0.4)',
           ],
           borderWidth: 2,
           borderColor: [
@@ -219,11 +217,89 @@
             // purple
             'rgba(170, 128, 252, 1)',
             // blue
-            'rgba(98,  182, 239, 1)',
+            'rgba(98, 182, 239, 1)',
           ]
         }
       ],
     };
+
+    // query results sorted by hour
+    var queriesByHour: Result[][] = [];
+
+    for(let i = 0; i < 24; i++)
+      queriesByHour.push([]);
+    
+    // sort results by hour
+    allQueryResults.forEach((res) => {
+      const date = new Date(res.createdAt);
+      const hour = date.getHours();
+      queriesByHour[hour].push(res);
+    });
+
+    // calculate avg for every hour
+    
+    queriesByHour.forEach((resList) => {
+      let supabaseAvg = 0;
+      let railwayAvg = 0;
+      let renderAvg = 0;
+      resList.forEach(res => {
+        supabaseAvg += res.supabaseTime;
+        railwayAvg += res.railwayTime;
+        renderAvg += res.renderTime;
+      });
+      if(resList.length > 0) {
+        supabaseAvg /= resList.length;
+        railwayAvg /= resList.length;
+        renderAvg /= resList.length;
+      } else {
+        supabaseAvg = 0;
+        railwayAvg = 0;
+        renderAvg = 0;
+      }
+
+      queryHourAvgSupabase.push(supabaseAvg);
+      queryHourAvgRailway.push(railwayAvg);
+      queryHourAvgRender.push(renderAvg);
+    });
+
+    // insert results sorted by hour
+    var insertsByHour: Result[][] = [];
+
+    for(let i = 0; i < 24; i++)
+      insertsByHour.push([]);
+    
+    // sort results by hour
+    allInsertResults.forEach((res) => {
+      const date = new Date(res.createdAt);
+      const hour = date.getHours();
+      insertsByHour[hour].push(res);
+    });
+
+    // calculate avg for every hour
+    
+    insertsByHour.forEach((resList) => {
+      let supabaseAvg = 0;
+      let railwayAvg = 0;
+      let renderAvg = 0;
+      resList.forEach(res => {
+        supabaseAvg += res.supabaseTime;
+        railwayAvg += res.railwayTime;
+        renderAvg += res.renderTime;
+      });
+      if(resList.length > 0) {
+        supabaseAvg /= resList.length;
+        railwayAvg /= resList.length;
+        renderAvg /= resList.length;
+      } else {
+        supabaseAvg = 0;
+        railwayAvg = 0;
+        renderAvg = 0;
+      }
+
+      insertHourAvgSupabase.push(supabaseAvg);
+      insertHourAvgRailway.push(railwayAvg);
+      insertHourAvgRender.push(renderAvg);
+    });
 
     showCharts = true;
   }
@@ -234,7 +310,9 @@
     Legend,
     BarElement,
     CategoryScale,
-    LinearScale
+    LinearScale,
+    LineElement,
+    PointElement,
   );
 </script>
 
@@ -260,7 +338,7 @@
           <Bar data={currQueryChartData} options={{ responsive: true }} />
         </div>
         <div class="flex flex-col justify-center items-center py-8 px-4">
-          <h2>All-time query tests</h2>
+          <h2>All-time avg query</h2>
           <Bar data={allQueryChartData} options={{ responsive: true }} />
         </div>
       </div>
@@ -270,12 +348,24 @@
           <Bar data={currInsertChartData} options={{ responsive: true }} />
         </div>
         <div class="flex flex-col justify-center items-center py-8 px-4">
-          <h2>All-time insert tests</h2>
+          <h2>All-time avg insert</h2>
           <Bar data={allInsertChartData} options={{ responsive: true }} />
         </div>
       </div>
-      <h2 class="flex justify-center items-center">Samples: {sampleCount}</h2>
     </div>
+    <div class="flex flex-col justify-center items-center py-8 px-4">
+      <h2>Avg query time by hour [ms]</h2>
+      <div class="chart-container" style="position: relative; height:300px; width:600px">
+        <Line data={makeLineChartData(queryHourAvgSupabase, queryHourAvgRailway, queryHourAvgRender)} options={{ responsive: true }} />
+      </div>
+    </div>
+    <div class="flex flex-col justify-center items-center py-8 px-4">
+      <h2>Avg insert time by hour [ms]</h2>
+      <div class="chart-container" style="position: relative; height:300px; width:600px">
+        <Line data={makeLineChartData(insertHourAvgSupabase, insertHourAvgRailway, insertHourAvgRender)} options={{ responsive: true }} />
+      </div>
+    </div>
+    <h2 class="flex justify-center items-center">Samples: {sampleCount}</h2>
     {/if}
   </main>
 </div>

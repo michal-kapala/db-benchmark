@@ -1,0 +1,85 @@
+export function makeLineChartData(supabaseData: number[], railwayData: number[], renderData: number[]) {
+  const chartData: any = {
+    labels: [
+      '12PM', '1AM', '2AM', '3AM', '4AM', '5AM','6AM',
+      '7AM', '8AM', '9AM', '10AM', '11AM', '12AM',
+      '1PM', '2PM', '3PM', '4PM', '5PM', '6PM',
+      '7PM', '8PM', '9PM', '10PM', '11PM',
+    ],
+    datasets: [
+      {
+        label: 'Supabase',
+        lineTension: 0.3,
+        backgroundColor: 'rgba(113, 205, 205, 0.4)',
+        borderColor: 'rgba(113, 205, 205, 1)',
+        borderCapStyle: 'butt',
+        borderDash: [],
+        borderDashOffset: 0.0,
+        borderJoinStyle: 'miter',
+        pointBorderColor: 'rgba(113, 205, 205, 1)',
+        pointBackgroundColor: 'rgb(255, 255, 255)',
+        pointBorderWidth: 10,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: 'rgb(0, 0, 0)',
+        pointHoverBorderColor: 'rgba(220, 220, 220,1)',
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+        data: supabaseData,
+      },
+      {
+        label: 'Railway',
+        lineTension: 0.3,
+        backgroundColor: 'rgba(170, 128, 252, 0.4)',
+        borderColor: 'rgb(170, 128, 252)',
+        borderCapStyle: 'butt',
+        borderDash: [],
+        borderDashOffset: 0.0,
+        borderJoinStyle: 'miter',
+        pointBorderColor: 'rgb(170, 128, 252)',
+        pointBackgroundColor: 'rgb(255, 255, 255)',
+        pointBorderWidth: 10,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: 'rgb(0, 0, 0)',
+        pointHoverBorderColor: 'rgba(220, 220, 220, 1)',
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+        data: railwayData,
+      },
+      {
+        label: 'Render',
+        lineTension: 0.3,
+        backgroundColor: 'rgba(98,  182, 239, 0.4)',
+        borderColor: 'rgb(98,  182, 239)',
+        borderCapStyle: 'butt',
+        borderDash: [],
+        borderDashOffset: 0.0,
+        borderJoinStyle: 'miter',
+        pointBorderColor: 'rgb(98,  182, 239)',
+        pointBackgroundColor: 'rgb(255, 255, 255)',
+        pointBorderWidth: 10,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: 'rgb(0, 0, 0)',
+        pointHoverBorderColor: 'rgba(220, 220, 220, 1)',
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+        data: renderData,
+      },
+    ],
+  };
+  return chartData;
+}
+
+// Bar chart data type
+export type BarChartData = {
+  labels: string[],
+  datasets: {
+    label: string,
+    data: number[],
+    backgroundColor: string[],
+    borderWidth: number,
+    borderColor: string[]
+  }[],
+};
